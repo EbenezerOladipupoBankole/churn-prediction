@@ -118,6 +118,18 @@ def get_shap_values(_explainer, _model_pipeline, data):
     data_transformed = preprocessor.transform(data)
     return _explainer(data_transformed)
 
+# --- CLV Calculation for single prediction ---
+@st.cache_data
+def calculate_clv(monthly_charges, tenure, churn_proba, discount_rate=0.05):
+    """Calculates the estimated CLV for a single customer."""
+    if churn_proba >= 1:
+        return 0 # Customer is certain to churn, CLV is 0
+    # Estimate expected tenure in months
+    expected_tenure = 1 / churn_proba
+    # Simple CLV formula: (Monthly Charges * Expected Tenure) / (1 + Discount Rate)^n
+    clv = (monthly_charges * expected_tenure) / (1 + discount_rate)**(expected_tenure / 12)
+    return clv
+
 # --- App Layout ---
 models = load_models()
 X_test, y_test = load_test_data()
@@ -131,7 +143,7 @@ with st.sidebar:
     if os.path.exists(profile_pic_path):
         st.image(profile_pic_path, width=150)
     else:
-        st.info("Add `assets/eb.jpg` to see your profile picture here.")
+        st.markdown("# 👨‍💻") # Clean placeholder for demo
     st.markdown("Bankole Ebenezer")
     st.markdown("*Data Scientist | ML Engineer*")
     st.markdown("Welcome to my churn prediction dashboard! Feel free to connect with me via the links below.")
@@ -234,16 +246,26 @@ if page == "🔮 Predict Churn":
             churn_proba = xgb_pipeline.predict_proba(input_df)[:, 1][0]
             churn_percentage = churn_proba * 100
 
+            # --- Calculate CLV for the single customer ---
+            clv = calculate_clv(monthly_charges, tenure, churn_proba)
+
         # --- Display results ---
         st.subheader("Prediction Result")
         res_col1, res_col2 = st.columns([1, 2])
         with res_col1:
-            st.metric(
-                label="Churn Probability",
-                value=f"{churn_percentage:.2f}%",
-                delta="High Risk" if churn_percentage > 50 else "Medium Risk" if churn_percentage > 25 else "Low Risk",
-                delta_color="inverse"
-            )
+            with st.container(border=True):
+                st.metric(
+                    label="Churn Probability",
+                    value=f"{churn_percentage:.2f}%",
+                    delta="High Risk" if churn_percentage > 50 else "Medium Risk" if churn_percentage > 25 else "Low Risk",
+                    delta_color="inverse"
+                )
+            with st.container(border=True):
+                 st.metric(
+                    label="Estimated CLV",
+                    value=f"${clv:,.2f}",
+                    help="Estimated Customer Lifetime Value based on current inputs and churn probability. A higher churn risk significantly lowers the CLV."
+                )
             st.progress(float(churn_proba))
             st.write("This bar represents the model's predicted probability of churn.")
 
@@ -257,7 +279,7 @@ if page == "🔮 Predict Churn":
                     explainer = get_shap_explainer(models['xgb'], X_test)
                     shap_values = get_shap_values(explainer, models['xgb'], input_df)
 
-                    st.write(f"**Model Base Value (Average Churn Probability):** {explainer.expected_value:.2f}")
+                    st.write(f"**Model Base Value (Log-Odds):** {explainer.expected_value:.2f}")
                     fig, ax = plt.subplots(facecolor='#1E1E2D')
                     ax.tick_params(colors='white')
                     shap.plots.waterfall(shap_values[0], max_display=10, show=False)
