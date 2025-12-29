@@ -6,7 +6,7 @@ This document outlines how AI assistance (Gemini Code Assist) was used in the de
 
 I used the AI assistant primarily for the following tasks:
 
-*   **Code Generation & Refactoring:** Generating boilerplate code for the Streamlit app structure, implementing the scikit-learn preprocessing pipeline, and refactoring the model training script.
+
 *   **Debugging:** Identifying why models were failing (due to unencoded categorical data) and suggesting the `ColumnTransformer` approach.
 *   **Conceptual Understanding:** Explaining the difference between `st.cache_data` and `st.cache_resource` and how to correctly implement SHAP explanations for different model types.
 *   **Best Practices:** Suggesting improvements like saving the entire model pipeline instead of just the model, and ensuring the Streamlit app loads models and data efficiently.
@@ -15,13 +15,12 @@ I used the AI assistant primarily for the following tasks:
 
 Here are a few prompts that led to significant progress:
 
-1.  **Initial Scaffolding:**
-    > "Based on my project requirements, can you create the main structure for my `app.py` file using Streamlit tabs for 'Predict', 'Model Performance', and 'CLV Overview'?"
 
-2.  **Solving a Core Problem:**
+
+1.  **Solving a Core Problem:**
     > "My `train_models.py` script is failing because the models can't handle string values. How can I create a scikit-learn pipeline to properly preprocess my categorical and numerical features and save it so I can use it in my Streamlit app?"
 
-3.  **Implementing Interpretability:**
+2.  **Implementing Interpretability:**
     > "Show me how to implement a SHAP summary plot for my XGBoost model in the 'Model Performance' tab of my Streamlit app. Make sure it's calculated efficiently."
 
 ## 3. Verification and Corrections
