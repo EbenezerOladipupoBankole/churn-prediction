@@ -145,7 +145,7 @@ with st.sidebar:
     else:
         st.markdown("# 👨‍💻") # Clean placeholder for demo
     st.markdown("Bankole Ebenezer")
-    st.markdown("*Data Scientist | ML Engineer*")
+    st.markdown("*AI/ML Intern*")
     st.markdown("Welcome to my churn prediction dashboard! Feel free to connect with me via the links below.")
     st.markdown("[LinkedIn](https://www.linkedin.com/) | [GitHub](https://github.com/)")
     st.markdown("---")
